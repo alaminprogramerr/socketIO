@@ -7,5 +7,6 @@ postRouter.get('/order/:id' , authenticate, postContrler.getSinglePost)//get a s
 postRouter.post('/order/delete/:id' , authenticate, postContrler.deletePost)
 postRouter.post('/order/updatePost/:id' , authenticate, postContrler.updatePost)
 postRouter.post('/order/filter', authenticate , postContrler.dateFilter)
+postRouter.get('/order/getAllPost', authenticate , postContrler.getAllPost)
  
 module.exports= postRouter

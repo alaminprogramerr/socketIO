@@ -147,14 +147,25 @@ const dateFilter = (req, res )=>{
     })
 }
 
+const getAllPost=(req, res)=>{
+    postModel.find()
+    .then(data=>{
+         return res.status(200).json({Posts:data})
+    })
+    .catch(err=>{
+        console.log(err)
+         return res.status(500).json({massage:"server error "})
+    })
 
+}
 module.exports={
     
     createPost,
     getSinglePost,
     deletePost,
     updatePost , 
-    dateFilter
+    dateFilter, 
+    getAllPost:getAllPost
 }
 
 

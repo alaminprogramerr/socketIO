@@ -54,6 +54,7 @@ postRouter.get('/order/:id' , postContrler.getSinglePost)//get a single post
 postRouter.post('/order/delete/:id' , postContrler.deletePost)//delete a post
 postRouter.post('/order/updatePost/:id' , authenticate, postContrler.updatePost)//give id in paraam to update a post
 postRouter.post('/order/filter' , postContrler.dateFilter)//filter date to date filter
+postRouter.get('/order/getAllPost', authenticate , postContrler.getAllPost)/ get  all post  by get request 
  
 
 
