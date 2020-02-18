@@ -1,0 +1,20 @@
+1. Implementation of userID, ProviderId based filter is missing//done
+2. Please use timestamp for dates don't use date format (wherever you're using dates)//done
+3. Regarding socket IO, we don't have any option to remove the deals once it's accepted.//done
+when we user /orders/:userId => we have to fetch all orders based on these condition
+Given fromDate, toDate, Status
++ :userId => provider (or) use
+how to update post 
+but How to i update if the post is accepted by someone else?
+but you haven't implemented for "how to accept/decline that order"
+
+
+
+
+
+Few spelling mistack:
+====================
+controller => you used contrler/controler
+message => you have used massage
+
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App</title>
+    <style>
+        #alertBox {
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <script>
+        $(document).ready(function () {
+            console.log("ready")
+
+            const socket = io('http://localhost:5000');
+
+
+            $('#join').click(function () {
+
+                var email = $("#email").val();
+                var id = $("#id").val();
+                var type = $("#type").val();
+                var location = $("#location").val();
+                var locArr = location.split(",");
+
+                var userObj = {
+                    id:id,
+                    name: email,
+                    email: email,
+                    type: type,
+                    location: {
+                        lat: parseFloat(locArr[0]),
+                        lon: parseFloat(locArr[1])
+                    }
+                }
+                console.log(userObj);
+
+                socket.emit('join', userObj);
+                socket.on('join', function (data) {
+                    console.log(data);
+                })
+
+                socket.on('newPost', function (data) {
+                    console.log('newPost');
+                    console.log(data);
+                    if (data.Post.status == 'pending') {
+                        $("#alertBox").show();
+                        $("#title").text(data.title)
+                        $("#description").text(data.description)
+                    }
+                    else {
+                        $("#alertBox").hide();
+                    }
+                })
+
+                socket.on('doPostResult', function (data) {
+                    console.log('doPostResult');
+                    console.log(data);
+                })
+            });
+
+            $("#createPost").click(function () {
+
+                var email = $("#email").val();
+                var type = $("#type").val();
+                var location = $("#location").val();
+                var locArr = location.split(",");
+
+                var postObj = {
+                    title: "Sample Post",
+                    description: "sample descrio",
+                    postCreator: {
+                        type: type,
+                        name: email,
+                        email: email,
+                        location: {
+                            lat: parseFloat(locArr[0]),
+                            lon: parseFloat(locArr[1])
+                        }
+                    },
+                    providerId: 123,
+                    status: 'pending'
+                };
+                console.log(postObj);
+                socket.emit('doPost', postObj);
+            })
+        })
+    </script>
+</head>
+
+<body>
+    <div>
+        <select id="email">
+            <option value="user1@demo.com">User 1</option>
+            <option value="user2@demo.com">User 2</option>
+            <option value="provider1@demo.com">Provider 1</option>
+            <option value="provider2@demo.com">Provider 2</option>
+            <option value="provider3@demo.com">Provider 3</option>
+        </select>
+        <select id="type">
+            <option value="user">User</option>
+            <option value="provider">Provider</option>
+        </select>
+        <select id="location">
+            <option value="13.080335,80.273345">Location 1</option>
+            <option value="13.079792,80.276284">Location 2</option>
+            <option value="13.082279,80.274096">Location 3</option>
+            <option value="13.081357,80.269477">Location 4</option>
+            <option value="13.080142,80.262884">Location 5</option>
+            <option value="13.081479,80.273741">Location 6</option>
+        </select>
+        <button id="join">Join</button>
+    </div>
+    <div>
+        <button id="createPost">Create Post</button>
+    </div>
+    <div id="alertBox">
+        <p id="title"></p>
+        <p id="description"></p>
+        <button id="accept">Accept</button>
+        <button id="accept">Reject</button>
+    </div>
+</body>
+
+</html>

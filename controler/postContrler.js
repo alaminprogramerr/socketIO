@@ -106,32 +106,43 @@ const  updatePost=(req, res)=>{
 }
 
 
-//filtering by date to date 
+//filtering by date to date and status  from all 
 const dateFilter = (req, res )=>{
+    if(!req.body.fromDate || !req.body.toDate){
+        return res.status(400).json({message:"Please Enter from Date and to Date"})
+    }
     let fromDate 
     let toDate 
-    if(req.body.fromDate.split('-').join('')<req.body.toDate.split('-').join('')){
-        fromDate=req.body.fromDate.split('-').join('')
-        toDate=req.body.toDate.split('-').join('')
+    let dateArray1= req.body.fromDate.split('-')
+    var date1=dateArray1[0]+"-"+dateArray1[1]+"-"+dateArray1[2];
+    let dateArray2= req.body.toDate.split('-')
+    var date2=dateArray2[0]+"-"+dateArray2[1]+"-"+dateArray2[2];
+
+    if(new Date(date1).getTime()<new Date(date2).getTime()){
+        fromDate=new Date(date1).getTime()
+        toDate=new Date(date2).getTime()
     }
-    if(req.body.fromDate.split('-').join('')>req.body.toDate.split('-').join('')){
+    if(new Date(date1).getTime()>new Date(date2).getTime()){
         
-        fromDate=req.body.toDate.split('-').join('')
-        toDate=req.body.fromDate.split('-').join('')
+        fromDate=new Date(date2).getTime()
+        toDate=new Date(date1).getTime()
     }
-    if(req.body.fromDate==req.body.toDate){
+    if(date1==date2){
         
-        fromDate=req.body.toDate.split('-').join('')
-        toDate=req.body.fromDate.split('-').join('')
+        fromDate=new Date(date2).getTime()
+        toDate=new Date(date1).getTime()
     }
-    console.log('fromDate', fromDate)
-    console.log('toDate', toDate)
+    // console.log('fromDate', fromDate)
+    // console.log('toDate', toDate)
     postModel.find()
     .then(posts=>{
         let filtered=[]
         posts.forEach(post=>{
             let pD= post.createdAt.split('-')
-            let compaireDate=pD.join('')
+            let compaireDate=new Date(pD).getTime()
+            // console.log('date1', fromDate)
+            // console.log("date2" , toDate)
+            // console.log('compaireDate', compaireDate)
             if(compaireDate>=fromDate && compaireDate<=toDate){
                 filtered.push(post)
             }
@@ -139,13 +150,144 @@ const dateFilter = (req, res )=>{
         if(filtered.length<1){
             return res.status(400).json({massage:"No post founded ! " , status:false})
         }
-        return res.status(200).json({massage:" post funded !" ,filtered:filtered})
+        if(req.body.status==="all"|| req.body.status==="All" || req.body.status==="ALL"){
+            console.log('your got all')
+            return res.status(200).json({massage:" post funded !" ,All:filtered})
+        }
+        
+        if(req.body.status==="COMPLETED"|| req.body.status==="completed" || req.body.status==="Completed"){
+            let completed =[]
+            filtered.forEach(single=>{
+                if(single.status==="COMPLETED"|| single.status==="completed" || single.status==="Completed"){
+                    completed.push(single)
+                }
+            })
+            console.log('your got completed')
+
+            return res.status(200).json({massage:" post funded !" ,completed:completed})
+        }
+        
+        
+        if(req.body.status==="ACCEPTED"|| req.body.status==="accepted" || req.body.status==="Accepted"){
+            let accepted =[]
+            filtered.forEach(single=>{
+                console.log(' status single', single.status)
+                if(single.status==="accepted"|| single.status==="ACCEPTED" || single.status==="Accepted"){
+                    accepted.push(single)
+                }else{
+                    
+                }
+            })
+            console.log('your got accepted')
+
+            return res.status(200).json({massage:" post funded !" ,accepted:accepted})
+        }
+        return res.status(400).json({massage:" Please provide form date , to date, and status properly  !" })
     })
     .catch(err=>{
         console.log(err)
        return res.status(500).json({massage:"server error occurd "})
     })
 }
+
+
+//filtering by date to date and status  from all 
+const dateFilterForSingleUser = (req, res )=>{
+    if(!req.body.fromDate || !req.body.toDate){
+        return res.status(400).json({message:"Please Enter from Date and to Date"})
+    }
+    let fromDate //timestamp one
+    let toDate //timestap two
+    let dateArray1= req.body.fromDate.split('-')
+    var date1=dateArray1[0]+"-"+dateArray1[1]+"-"+dateArray1[2];
+    let dateArray2= req.body.toDate.split('-')
+    var date2=dateArray2[0]+"-"+dateArray2[1]+"-"+dateArray2[2];
+
+    if(new Date(date1).getTime()<new Date(date2).getTime()){
+        fromDate=new Date(date1).getTime() //timestapmp
+        toDate=new Date(date2).getTime()//timestamp
+    }
+    if(new Date(date1).getTime()>new Date(date2).getTime()){
+        
+        fromDate=new Date(date2).getTime()
+        toDate=new Date(date1).getTime()
+    }
+    if(date1==date2){
+        
+        fromDate=new Date(date2).getTime()
+        toDate=new Date(date1).getTime()
+    }
+    // console.log('fromDate', fromDate)
+    // console.log('toDate', toDate)
+    postModel.find()
+    .then(posts=>{
+        let filtered=[]
+        posts.forEach(post=>{
+            let pD= post.createdAt.split('-')
+            let compaireDate=new Date(pD).getTime()
+            // console.log('date1', fromDate)
+            // console.log("date2" , toDate)
+            // console.log('compaireDate', compaireDate)
+            if(compaireDate>=fromDate && compaireDate<=toDate && req.params.id==post.postCreator.id){
+                filtered.push(post)
+            }
+        })
+        if(filtered.length<1){
+            return res.status(400).json({massage:"No post founded ! " , status:false})
+        }
+        if(req.body.status==="all"|| req.body.status==="All" || req.body.status==="ALL"){
+            console.log('your got all')
+            return res.status(200).json({massage:" post funded !" ,All:filtered})
+        }
+        
+        if(req.body.status==="COMPLETED"|| req.body.status==="completed" || req.body.status==="Completed"){
+            let completed =[]
+            filtered.forEach(single=>{
+                if(single.status==="COMPLETED"|| single.status==="completed" || single.status==="Completed"){
+                    completed.push(single)
+                }
+            })
+            console.log('your got completed')
+
+            return res.status(200).json({massage:" post funded !" ,completed:completed})
+        }
+        
+        
+        if(req.body.status==="ACCEPTED"|| req.body.status==="accepted" || req.body.status==="Accepted"){
+            let accepted =[]
+            filtered.forEach(single=>{
+                console.log(' status single', single.status)
+                if(single.status==="accepted"|| single.status==="ACCEPTED" || single.status==="Accepted"){
+                    accepted.push(single)
+                }else{
+                    
+                }
+            })
+            console.log('your got accepted')
+            return res.status(200).json({massage:" post funded !" ,accepted:accepted})
+        }
+        
+        if(req.body.status==="PENDING"|| req.body.status==="Pending" || req.body.status==="pending"){
+            let pending =[]
+            filtered.forEach(single=>{
+                console.log(' status single', single.status)
+                if(single.status==="pending"|| single.status==="PENDING" || single.status==="pending"){
+                    pending.push(single)
+                }else{
+                    
+                }
+            })
+            console.log('your got pending')
+            return res.status(200).json({massage:" post funded !" ,pending:pending})
+        }
+        return res.status(400).json({massage:" Please provide form date , to date, and status properly  !" })
+    })
+    .catch(err=>{
+        console.log(err)
+       return res.status(500).json({massage:"server error occurd "})
+    })
+}
+
 
 const getAllPost=(req, res)=>{
     postModel.find()
@@ -165,7 +307,9 @@ module.exports={
     deletePost,
     updatePost , 
     dateFilter, 
-    getAllPost:getAllPost
+    getAllPost:getAllPost,
+    dateFilterForSingleUser,
+    
 }
 
 

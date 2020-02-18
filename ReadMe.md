@@ -19,6 +19,7 @@ Note:pls make sure  emit and  obj  and all thing  formate as like given example
             title:"this is title ",
             description:"this is description ",
             postCreator:{
+                id:"47c6d5a047a620284aa" //please make sure this id must need  to provide
                 type:'user',
                 name:"post creator " , 
                 email:"creator email" , 
@@ -44,17 +45,43 @@ for closing a socket  for a user will like :
         })
  
 
+    //to accept a please do a emit with 'doAccept' with a single post id 
+    socket.on('doAccept' ,obj=>{
+        postModel.findByIdAndUpdate(obj.id)
+        .then(post=>{
+            post.status="accepted"
+            post.save()
+            .then(done=>{
+                socket.emit('accepted', {message:"Post accepted", postID:obj.id})
+            })
+        })
+    })
+    // to decline a  post please do emit with doDecline emit
+    socket.on('deDecline' , obj=>{
+        postModel.findByIdAndUpdate(obj.id)
+        .then(post=>{
+            post.status='decline'
+            post.save()
+            .then(done=>{
+                socket.emit('accepted', {message:"Post accepted", postID:obj.id})
+            })
+        })
+    })
 
  other thing will do with http requiest:
  
 
-POST MANATE  ROUTE 
+POST MANAGE  ROUTE 
 =====================
-postRouter.get('/order/:id' , postContrler.getSinglePost)//get a single post
-postRouter.post('/order/delete/:id' , postContrler.deletePost)//delete a post
-postRouter.post('/order/updatePost/:id' , authenticate, postContrler.updatePost)//give id in paraam to update a post
-postRouter.post('/order/filter' , postContrler.dateFilter)//filter date to date filter
-postRouter.get('/order/getAllPost', authenticate , postContrler.getAllPost)/ get  all post  by get request 
+
+
+
+postRouter.get('/order/:id' , authenticate, postContrler.getSinglePost)//get a single post
+postRouter.post('/order/delete/:id' , authenticate, postContrler.deletePost)//to delete a post
+postRouter.post('/order/updatePost/:id' , authenticate, postContrler.updatePost)//to update a post
+postRouter.post('/order/filter' , postContrler.dateFilter) // to get all post by given from date / to date /  and status 
+postRouter.post('/order/:id' , postContrler.dateFilterForSingleUser)//toget all post a single user / admin / provider
+postRouter.get('/order/getAllPost', authenticate , postContrler.getAllPost)//for get all post  without post
  
 
 
@@ -64,5 +91,5 @@ userRouter.post('/auth/login' ,userControler.loginControler)//login
 userRouter.post('/auth/register', userControler.registerControler)//register
 userRouter.post('/auth/forget',   userControler.forget)//forget
 userRouter.post('/auth/reset' , authenticate , userControler.reset)//reset
-userRouter.get('/auth/me',authenticate, userControler.getMe)
-userRouter.post('/auth/me', authenticate , userControler.postMe)
+userRouter.get('/auth/me',authenticate, userControler.getMe)//get informaton about profile
+userRouter.post('/auth/me', authenticate , userControler.postMe)///update profile 

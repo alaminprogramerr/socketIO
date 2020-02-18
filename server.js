@@ -46,6 +46,8 @@ const IO = socketIO(server)
 const filterer = require('./socket/filterUserToSendNotification')
 const postControler = require('./controler/postContrler')
 const userManege =require('./socket/users')
+const postModel = require('./model/postModel')
+
 
 IO.on('connection' , (socket)=>{
     let users= userManege.users
@@ -59,6 +61,28 @@ IO.on('connection' , (socket)=>{
         console.log('nearByUser' , nearByUser)
         nearByUser.forEach(element=>{
             socket.broadcast.to(element.id).emit('newPost' , {message:"A new post has been created !", Post:obj })
+        })
+    })
+    //to accept a please do a emit with 'doAccept' with a single post id 
+    socket.on('doAccept' ,obj=>{
+        postModel.findByIdAndUpdate(obj.id)
+        .then(post=>{
+            post.status="accepted"
+            post.save()
+            .then(done=>{
+                socket.emit('accepted', {message:"Post accepted", postID:obj.id})
+            })
+        })
+    })
+    // to decline a  post please do emit with doDecline emit
+    socket.on('deDecline' , obj=>{
+        postModel.findByIdAndUpdate(obj.id)
+        .then(post=>{
+            post.status='decline'
+            post.save()
+            .then(done=>{
+                socket.emit('accepted', {message:"Post accepted", postID:obj.id})
+            })
         })
     })
     socket.on('disconnect' , ()=>{
